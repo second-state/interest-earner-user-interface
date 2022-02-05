@@ -18,7 +18,7 @@
       <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
       <script src="../js/helper.js"></script>
       <div class="container View WelcomeView">
-        <h1 class="Banner">ParaState Linear Timelock</h1>
+        <h1 class="Banner">ParaState Simple Staking</h1>
         <div class="Message center">
           <div class="Title"></div>
           <a onclick="connectWallet()" id="connect" title="MetaMask via Wikimedia Commons- https://commons.wikimedia.org/wiki/File:MetaMask_Fox.svg">
@@ -27,18 +27,13 @@
           <div class="Details" id="connect_wallet_text">Click ☝️ to connect wallet. </div>
           <br>
           <hr>
+          <div class="Details" id="connect_wallet_text">Balances</div>
           <input class="full_width small" id="eth_address" type="text" value="Ethereum address">
           <br>
-          <br>
-          <input class="full_width small" id="state_amount" type="text" value="ERC20 amount in wei">
-          <br>
-          <br>
-          <button class="clearButton center" onclick="clearInput()" id="clear_input">Clear input</button>
-          <br>
+<br>
           <button class="BalanceButton center" id="button_calculate_balances" onclick="calculateBalances()">Refresh/Calculate Balances</button>
           <br>
-          <button class="NavButton center" id="button_transfer_tokens" onclick="onButtonClickTransfer($('#eth_address').val())">Unlock Your Tokens</button>
-          <br>
+
           <table id="example" class="table-responsive-sm center tableText">
             <thead>
               <tr>
@@ -56,6 +51,28 @@
             </tbody>
           </table>
           <br>
+          <hr>
+          <div class="Details" id="connect_wallet_text">Staking and Unstaking</div>
+          <div class="container">
+            <div class="row">
+              <div class="col-sm">
+                <input class="full_width small" id="amount_to_state" type="text" value="Amount to stake">
+              </div>
+              <div class="col-sm">
+                <input class="full_width small" id="amount_to_unstake" type="text" value="Amount to unstake">
+              </div>
+            </div>
+          <br>
+          <div class="container">
+            <div class="row">
+              <div class="col-sm">
+                          <button class="NavButton center" id="button_stake_tokens" onclick="stakeTokens($('#eth_address').val())">Stake Tokens</button>
+              </div>
+              <div class="col-sm">
+                         <button class="NavButton center" id="button_stake_tokens" onclick="stakeTokens($('#eth_address').val())">Unstake Tokens</button>
+              </div>
+            </div>
+            <br>
           <div class="progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" id="pb" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
           </div>
