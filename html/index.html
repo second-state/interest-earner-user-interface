@@ -31,20 +31,18 @@
           <input class="full_width small" id="eth_address" type="text" value="Ethereum address">
           <br>
           <br>
-          <button class="BalanceButton center" id="button_calculate_balances" onclick="calculateBalances()"><span class="hover-tipso-tooltip" data-tipso="Calculates and displays: a) the amount of currently locked tokens b) how many tokens have been unlocked to date & c) how many tokens are available to be unlocked (at this current point in time)">Refresh/Calculate Balances</span></button>
+          <button class="BalanceButton center" id="button_calculate_balances" onclick="calculateBalances()"><span class="hover-tipso-tooltip" data-tipso="Calculates and displays: a) the amount of currently locked tokens b) how many tokens are available to be unlocked (at this current point in time)">Refresh/Calculate Balances</span></button>
           <br>
           <table id="example" class="table-responsive-sm center tableText">
             <thead>
               <tr>
                 <th scope="col"><span class="hover-tipso-tooltip" data-tipso="The amount of tokens which are currently locked in the smart contract">Locked</span></th>
-                <th scope="col"><span class="hover-tipso-tooltip" data-tipso="The amount of tokens which have already been unlocked (to date)">Unlocked</span></th>
                 <th scope="col"><span class="hover-tipso-tooltip" data-tipso="The amount of tokens which are currently available to unlock (transfer tokens from smart contract back to your wallet)">Unlockable</span></th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td id="locked">0</td>
-                <td id="unlocked">0</td>
                 <td id="unlockable">0</td>
               </tr>
             </tbody>
