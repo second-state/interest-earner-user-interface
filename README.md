@@ -1,10 +1,10 @@
-# Simple Staking User Interface (UI)
+# Interest Earner User Interface (UI)
 
 # What does it do?
 
-Interacts with the [simple staking smart contract](https://github.com/second-state/simple-staking-smart-contract), which allows users to stake and unstake tokens.
+Interacts with the [interest earner smart contract](https://github.com/second-state/interest-earner-smart-contract), which allows users to stake and unstake tokens.
 
-# How do end users interact with the simple staking UI
+# How do end users interact with the interest earner UI
 
 Users simply load the page, (the user's account details are automatically pre-filled in the address input box)
 
@@ -22,21 +22,21 @@ The user clicks the calculate balances button to see if any tokens are eligable 
 
 The user clicks the "Unstake Tokens" button
 
-# Where is the simple staking smart contract
+# Where is the interest earner smart contract
 
-The [simple staking smart contract](https://github.com/second-state/simple-staking-smart-contract) is deployed on the Ethereum mainnet and then this UI source code is updated with the simple staking contract's ABI, deployment address and so forth. This simple staking UI instantiates the staking contract in order to interact and transfer tokens to end users and so forth.
+The [interest earner smart contract](https://github.com/second-state/interest-earner-smart-contract) is deployed on the Ethereum mainnet and then this UI source code is updated with the interest earner contract's ABI, deployment address and so forth. This interest earner UI instantiates the staking contract in order to interact and transfer tokens to end users and so forth.
 
 # How to deploy this UI
 
 Clone this repository
 
 ```
-git clone git@github.com:second-state/simple-staking-user-interface.git
+git clone git@github.com:second-state/interest-earner-user-interface.git
 ```
 
-## ABI and address of simple staking contract
+## ABI and address of interest earner contract
 
-Paste the ABI **and the address** of the simple staking contract's successfully deployed contract instance, into the helper.js file
+Paste the ABI **and the address** of the interest earner contract's successfully deployed contract instance, into the helper.js file
 
 ## Contract address of ERC20 contract (NOT staking contract)
 
@@ -58,4 +58,4 @@ To publish/deploy simply type
 npm run deploy
 ```
 
-The site will then be hosted to [https://second-state.github.io/simple-staking-user-interface/html/](https://second-state.github.io/simple-staking-user-interface/html/)
+The site will then be hosted to [https://second-state.github.io/interest-earner-user-interface/html/](https://second-state.github.io/interest-earner-user-interface/html/)
