@@ -1,0 +1,81 @@
+<! DOCTYPE html>
+    <meta charset="utf-8">
+    <link rel="shortcut icon" href="../images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#000000">
+    <title>Home | Linear Timelock</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/tipso.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.0-rc.0/web3.min.js" integrity="sha512-/PTXSvaFzmO4So7Ghyq+DEZOz0sNLU4v1DP4gMOfY3kFu9L/IKoqSHZ6lNl3ZoZ7wT20io3vu/U4IchGcGIhfw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  </head>
+  <body>
+    <div id="root">
+      <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+      <script src="../js/helper.js"></script>
+      <script src="../js/tipso.js"></script>
+      <div class="container View WelcomeView">
+        <h1 class="Banner">ParaState Simple Staking</h1>
+        <div class="Message center">
+          <a onclick="connectWallet()" id="connect" title="MetaMask via Wikimedia Commons- https://commons.wikimedia.org/wiki/File:MetaMask_Fox.svg"><img class="small_fox" width="80px" alt="MetaMask Fox" src="../images/metamask-fox.svg"></img></a>
+          <div class="Details" id="connect_wallet_text">Click ☝️ to connect wallet. </div>
+          <br>
+          <hr>
+          <div class="Details" id="balance_text"><b>Balances</b></div>
+          <input class="full_width small" id="eth_address" type="text" value="Ethereum address">
+          <br>
+          <br>
+          <button class="BalanceButton center" id="button_calculate_balances" onclick="calculateBalances()"><span class="hover-tipso-tooltip" data-tipso="Calculates and displays: a) the amount of currently locked tokens b) how many tokens are available to be unlocked (at this current point in time)">Refresh/Calculate Balances</span></button>
+          <br>
+          <table id="example" class="table-responsive-sm center tableText">
+            <thead>
+              <tr>
+                <th scope="col"><span class="hover-tipso-tooltip" data-tipso="The amount of tokens which are currently locked in the smart contract">Locked</span></th>
+                <th scope="col"><span class="hover-tipso-tooltip" data-tipso="The amount of tokens which are currently available to unlock (transfer tokens from smart contract back to your wallet)">Unlockable</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="locked">0</td>
+                <td id="unlockable">0</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr>
+          <div class="Details" id="staking_text"><b><span class="hover-tipso-tooltip" data-tipso="Please enter the amount of tokens (in Wei) which you would like to lock or unlock i.e. one whole token is equivalent to 1000000000000000000 Wei">Locking and Unlocking</span></b></div>
+          <div class="container">
+            <div class="row">
+              <div class="col-sm">
+                <input class="full_width small" id="amount" type="text" value="Lock amount in Wei">
+              </div>
+            </div>
+          <br>
+          <div class="container">
+            <div class="row">
+              <div class="col-sm">
+                          <button class="NavButton center" id="button_lock_tokens" onclick="onButtonClickLock($('#eth_address').val())"><span class="hover-tipso-tooltip" data-tipso="This will lock tokens in the smart contract (tokens will no longer be visible in your wallet)">Lock Tokens</span></button>
+              </div>
+              <div class="col-sm">
+                         <button class="NavButton center" id="button_unlock_tokens" onclick="onButtonClickUnLock($('#eth_address').val())"><span class="hover-tipso-tooltip" data-tipso="This will unlock tokens from the smart contract (tokens will become visible in your wallet again)">Unlock Tokens</span></button>
+              </div>
+            </div>
+            <br>
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" id="pb" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+          </div>
+          <hr>
+          <a href="https://parastate.io" target="_blank">
+            <img class="center small_image" src="../images/parastate_logo.png">
+          </a>
+          <br>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

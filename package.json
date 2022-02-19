@@ -1,0 +1,26 @@
+{
+  "name": "simple-staking-user-interface",
+  "version": "1.0.4",
+  "description": "A user interface for the https://github.com/second-state/simple-staking-smart-contract/",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "gh-pages -d public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/second-state/simple-staking-user-interface.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/second-state/simple-staking-user-interface/issues"
+  },
+  "homepage": "https://second-state.github.io/simple-staking-user-interface/html",
+  "dependencies": {
+    "ethers": "^5.5.3",
+    "express": "^4.17.2",
+    "gh-pages": "^3.2.3"
+  }
+}
