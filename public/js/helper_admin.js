@@ -1,13 +1,8 @@
-var ie_abi = JSON.parse($.getJSON({'url': "../js/ie.json", 'async': false}).responseText);
-console.log("ABI: " + JSON.stringify(ie_abi));
-var erc20_abi = JSON.parse($.getJSON({'url': "../js/erc20.json", 'async': false}).responseText);
-console.log("ABI: " + JSON.stringify(erc20_abi));
+var interest_earner_abi = JSON.parse($.getJSON({'url': "../js/interest_earner_abi.json", 'async': false}).responseText);
+var erc20_abi = JSON.parse($.getJSON({'url': "../js/erc20_abi.json", 'async': false}).responseText);
+var interest_earner_contract_address = JSON.parse($.getJSON({'url': "../js/interest_earner_contract_address.json", 'async': false}).responseText);
+var erc20_contract_address = JSON.parse($.getJSON({'url': "../js/erc20_contract_address.json", 'async': false}).responseText);
 
-// Address of the linear timelock instance
-const staking_address = '0x1752BB77D585269490445A16a3Cf31c7bbfD77a7';
-
-// THIS MUST BE THE ERC20 ADDRESS NOT THE TIMELOCK ADDRESS
-const erc20_contract_address = '0x2bF9537817D359E6BE493dbf25E4B251A5800aB2';
 
 function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
@@ -172,9 +167,9 @@ async function updateBalances() {
     console.log("Current time: " + stakingAmounts.getCurrentTime());
 
     // Instantiate staking timelock contract
-    stakingTimeLockContract = await new ethers.Contract(staking_address, ie_abi, provider);
+    stakingTimeLockContract = await new ethers.Contract(interest_earner_contract_address.address, interest_earner_abi, provider);
     // Instantiate ERC20 contract
-    erc20TimeLockContract = new ethers.Contract(erc20_contract_address, erc20_abi, provider);
+    erc20TimeLockContract = new ethers.Contract(erc20_contract_address.address, erc20_abi, provider);
 
     // Timeperiod edge timestamp
     timePeriodTimestamp = await stakingTimeLockContract.timePeriod();
@@ -296,10 +291,10 @@ async function onButtonClickLock() {
     signer = provider.getSigner();
     console.log(signer);
 
-    // Instantiate staking contract
-    stakingTimeLockContract = new ethers.Contract(staking_address, abi, signer);
+    // Instantiate staking timelock contract
+    stakingTimeLockContract = await new ethers.Contract(interest_earner_contract_address.address, interest_earner_abi, signer);
     // Instantiate ERC20 contract
-    erc20TimeLockContract = new ethers.Contract(erc20_contract_address, erc20_abi, signer);
+    erc20TimeLockContract = new ethers.Contract(erc20_contract_address.address, erc20_abi, signer);
 
     // Init toast response
     var toastResponse;
@@ -654,10 +649,10 @@ async function onButtonClickUnLock() {
     signer = provider.getSigner();
     console.log(signer);
 
-    // Instantiate staking contract
-    stakingTimeLockContract = new ethers.Contract(staking_address, abi, signer);
+    // Instantiate staking timelock contract
+    stakingTimeLockContract = await new ethers.Contract(interest_earner_contract_address.address, interest_earner_abi, signer);
     // Instantiate ERC20 contract
-    erc20TimeLockContract = new ethers.Contract(erc20_contract_address, erc20_abi, signer);
+    erc20TimeLockContract = new ethers.Contract(erc20_contract_address.address, erc20_abi, signer);
 
     // Init toast response
     var toastResponse;
