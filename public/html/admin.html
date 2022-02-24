@@ -21,17 +21,14 @@
       <script src="../js/helper.js"></script>
       <script src="../js/tipso.js"></script>
       <div class="container View WelcomeView">
-        <h1 class="Banner">ParaState Interest Earner</h1>
+        <h1 class="Banner">ParaState Interest Earner - ADMIN</h1>
         <div class="Message center">
           <a onclick="connectWallet()" id="connect" title="MetaMask via Wikimedia Commons- https://commons.wikimedia.org/wiki/File:MetaMask_Fox.svg"><img class="small_fox" width="80px" alt="MetaMask Fox" src="../images/metamask-fox.svg"></img></a>
           <div class="Details" id="connect_wallet_text">Click ☝️ to connect wallet. </div>
           <br>
           <hr>
-          <div class="Details" id="balance_text"><b>Account Address</b></div>
-          <input class="full_width small" id="eth_address" type="text" value="Ethereum address">
           <br>
-          <br>
-          <button class="BalanceButton center" id="button_calculate_balances" onclick="calculateBalances()"><span class="hover-tipso-tooltip" data-tipso="Calculates and displays: a) the amount of currently locked tokens b) how many tokens are available to be unlocked (at this current point in time)">Refresh/Calculate Balances</span></button>
+          <button class="BalanceButton center" id="button_calculate_balances" onclick="calculateBalances()"><span class="hover-tipso-tooltip" data-tipso="Calculates and displays values in the table below">Refresh/Calculate Balances</span></button>
           <br>
           <div class="table-responsive">
             <table class="table whiteText">
@@ -47,23 +44,25 @@
                   <td id="interest_per_annum"></td>
                 </tr>
                 <tr>
-                  <th scope="row">Your Staked Tokens</th>
-                  <td id="your_staked_tokens"></td>
+                  <th scope="row">Time Period Per Round</th>
+                  <td id="time_period_per_round"></td>
                 </tr>
                 <tr>
-                  <th scope="row">Your Interest Earned</th>
-                  <td id="your_interest_earned"></td>
+                  <th scope="row">Total Staked Tokens</th>
+                  <td id="total_staked_tokens"></td>
                 </tr>
                 <tr>
-                  <th scope="row">Your Un-Staking Date</th>
-                  <td id="your_un-staking_date"></td>
+                  <th scope="row">Total Expected Interest</th>
+                  <td id="total_expected_interest"></td>
+                </tr>
+                <tr>
+                  <th scope="row">Contract's Reserve Pool</th>
+                  <td id="contracts_reserve_pool"></td>
                 </tr>
               </tbody>
             </table>
           </div>
           <br>
-          <div><p class="whiteText"> Click <a href="./staking.html" ><b>here to stake</b></a> tokens and earn interest.</p></div>
-          <div><p class="whiteText"> Click <a href="./staking.html" ><b>here to un-stake</b></a> tokens and claim your interest earnings.</p></div>
           <hr>
           <div class="progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" id="pb" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>

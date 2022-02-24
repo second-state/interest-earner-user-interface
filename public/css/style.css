@@ -54,8 +54,8 @@ h1 {
 }
 
 a {
-  color: blue;
-  text-decoration: none;
+  color: white!important;
+  text-decoration: bold;
   cursor: pointer;
   user-select: none;
 }
@@ -65,6 +65,10 @@ a {
   flex-direction: column;
   background: url("../images/background_wide.jpg") no-repeat;
   background-size: cover;
+}
+
+.whiteText {
+  color: white!important;
 }
 
 .small {
@@ -119,7 +123,7 @@ color: white;
 
 .linkage {
   font-size: 12px;
-  color: blue;
+  color: white;
 }
 
 .View {

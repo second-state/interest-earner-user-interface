@@ -1,459 +1,13 @@
-const abi = [{
-        "inputs": [{
-            "internalType": "contract IERC20",
-            "name": "_erc20_contract_address",
-            "type": "address"
-        }],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-    },
-    {
-        "anonymous": false,
-        "inputs": [{
-                "indexed": false,
-                "internalType": "address",
-                "name": "to",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "TokensUnstaked",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [{
-                "indexed": false,
-                "internalType": "address",
-                "name": "from",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "tokensStaked",
-        "type": "event"
-    },
-    {
-        "inputs": [{
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-        }],
-        "name": "alreadyWithdrawn",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-        }],
-        "name": "balances",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "contractBalance",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "erc20Contract",
-        "outputs": [{
-            "internalType": "contract IERC20",
-            "name": "",
-            "type": "address"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "initialTimestamp",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "owner",
-        "outputs": [{
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-            "internalType": "uint256",
-            "name": "_timePeriodInSeconds",
-            "type": "uint256"
-        }],
-        "name": "setTimestamp",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "stakeTokens",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "timePeriod",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "timestampSet",
-        "outputs": [{
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "transferAccidentallyLockedTokens",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "unstakeTokens",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }
-];
+var ie_abi = JSON.parse($.getJSON({'url': "../js/ie.json", 'async': false}).responseText);
+console.log("ABI: " + JSON.stringify(ie_abi));
+var erc20_abi = JSON.parse($.getJSON({'url': "../js/erc20.json", 'async': false}).responseText);
+console.log("ABI: " + JSON.stringify(erc20_abi));
 
-const erc20_abi = [{
-        "inputs": [],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-    },
-    {
-        "anonymous": false,
-        "inputs": [{
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "spender",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "value",
-                "type": "uint256"
-            }
-        ],
-        "name": "Approval",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [{
-                "indexed": true,
-                "internalType": "address",
-                "name": "from",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "to",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "value",
-                "type": "uint256"
-            }
-        ],
-        "name": "Transfer",
-        "type": "event"
-    },
-    {
-        "inputs": [{
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "spender",
-                "type": "address"
-            }
-        ],
-        "name": "allowance",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "address",
-                "name": "spender",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "approve",
-        "outputs": [{
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-        }],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-            "internalType": "address",
-            "name": "account",
-            "type": "address"
-        }],
-        "name": "balanceOf",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "decimals",
-        "outputs": [{
-            "internalType": "uint8",
-            "name": "",
-            "type": "uint8"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "address",
-                "name": "spender",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "subtractedValue",
-                "type": "uint256"
-            }
-        ],
-        "name": "decreaseAllowance",
-        "outputs": [{
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-        }],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "address",
-                "name": "spender",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "addedValue",
-                "type": "uint256"
-            }
-        ],
-        "name": "increaseAllowance",
-        "outputs": [{
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-        }],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "name",
-        "outputs": [{
-            "internalType": "string",
-            "name": "",
-            "type": "string"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "symbol",
-        "outputs": [{
-            "internalType": "string",
-            "name": "",
-            "type": "string"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "totalSupply",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "address",
-                "name": "recipient",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "transfer",
-        "outputs": [{
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-        }],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-                "internalType": "address",
-                "name": "sender",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "recipient",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "transferFrom",
-        "outputs": [{
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-        }],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }
-];
 // Address of the linear timelock instance
-const staking_address = '0x8e00Af196371715c823c8B1494599268e93f241b';
+const staking_address = '0x1752BB77D585269490445A16a3Cf31c7bbfD77a7';
 
-
-// IMPORTANT - which address are you pasting here?
 // THIS MUST BE THE ERC20 ADDRESS NOT THE TIMELOCK ADDRESS
-const erc20_contract_address = '0x1d70e399C4cd5df0C11c9b1B00dfAd049f482ac4';
+const erc20_contract_address = '0x2bF9537817D359E6BE493dbf25E4B251A5800aB2';
 
 function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
@@ -464,8 +18,10 @@ class Amounts {
     constructor() {
         this.locked = new ethers.BigNumber.from('0');
         this.unlocked = new ethers.BigNumber.from('0');
-        this.unlockable = new ethers.BigNumber.from('0');
+        this.interestEarned = new ethers.BigNumber.from('0');
         this.timePeriod = new ethers.BigNumber.from('0');
+        this.basisPoints = new ethers.BigNumber.from('0');
+        this.initialTimePeriod = new ethers.BigNumber.from('0');
         this.currentTime = new ethers.BigNumber.from('0');
     }
 
@@ -477,12 +33,20 @@ class Amounts {
         return this.unlocked;
     }
 
-    getUnlockable() {
-        return this.unlockable;
+    getInterestEarned() {
+        return this.interestEarned;
     }
 
     getTimePeriod() {
         return this.timePeriod;
+    }
+
+    getBasisPoints() {
+        return this.basisPoints;
+    }
+
+    getInitialTimePeriod() {
+        return this.initialTimePeriod;
     }
 
     getCurrentTime() {
@@ -497,12 +61,20 @@ class Amounts {
         this.unlocked = this.unlocked.add(_unlocked);
     }
 
-    setUnlockable(_unlockable) {
-        this.unlockable = this.unlockable.add(_unlockable);
+    setInterestEarned(_interestEarned) {
+        this.interestEarned = this.interestEarned.add(_interestEarned);
     }
 
     setTimePeriod(_timePeriod) {
         this.timePeriod = _timePeriod;
+    }
+
+    setBasisPoints(_basisPoints) {
+        this.basisPoints = _basisPoints;
+    }
+
+    setInitialTimePeriod(_initialTimePeriod) {
+        this.initialTimePeriod = _initialTimePeriod;
     }
 
     setCurrentTime(_currentTime) {
@@ -512,8 +84,10 @@ class Amounts {
     reset() {
         this.locked = new ethers.BigNumber.from('0');
         this.unlocked = new ethers.BigNumber.from('0');
-        this.unlockable = new ethers.BigNumber.from('0');
+        this.interestEarned = new ethers.BigNumber.from('0');
         this.timePeriod = new ethers.BigNumber.from('0');
+        this.basisPoints = new ethers.BigNumber.from('0');
+        this.initialTimePeriod = new ethers.BigNumber.from('0');
         this.currentTime = new ethers.BigNumber.from('0');
     }
 }
@@ -566,8 +140,8 @@ async function connectWallet() {
     if (addressOfSigner) {
         console.log("Address of signer: " + addressOfSigner);
         document.getElementById("eth_address").value = addressOfSigner;
-        document.getElementById("connect_wallet_text").style.color = "#00FF7F";
-        document.getElementById("connect_wallet_text").innerHTML = "Wallet connected ✔";
+        document.getElementById("connect_wallet_text").style.color = "#40d9ff";
+        document.getElementById("connect_wallet_text").innerHTML = "Wallet Connected ✔";
     }
 }
 
@@ -581,8 +155,7 @@ async function updateBalances() {
     document.getElementById("pb").style.width = '0%';
     console.log("Disabling button");
     document.getElementById("button_calculate_balances").disabled = true;
-    document.getElementById("button_lock_tokens").disabled = true;
-    document.getElementById("button_unlock_tokens").disabled = true;
+    //document.getElementById("button_lock_tokens").disabled = true;
     document.getElementById("button_calculate_balances").value = "Calculating balances, please wait ...";
     document.getElementById("pb").style.transition = "all 30s linear 0s";
     document.getElementById("pb").style.width = '80%';
@@ -599,7 +172,7 @@ async function updateBalances() {
     console.log("Current time: " + stakingAmounts.getCurrentTime());
 
     // Instantiate staking timelock contract
-    stakingTimeLockContract = await new ethers.Contract(staking_address, abi, provider);
+    stakingTimeLockContract = await new ethers.Contract(staking_address, ie_abi, provider);
     // Instantiate ERC20 contract
     erc20TimeLockContract = new ethers.Contract(erc20_contract_address, erc20_abi, provider);
 
@@ -607,15 +180,81 @@ async function updateBalances() {
     timePeriodTimestamp = await stakingTimeLockContract.timePeriod();
     timePeriodTimestampBN = new ethers.BigNumber.from(timePeriodTimestamp);
     stakingAmounts.setTimePeriod(timePeriodTimestampBN);
+    var toastResponse;
 
-    // If we have not hit the unlock period then just send a message and end processing
-    if (
-        stakingAmounts.getCurrentTime().lt(stakingAmounts.getTimePeriod())) {
-        console.log("No tokens unlockable yet");
-        var unlockCommences = new Date(timePeriodTimestamp * 1000);
+    // Eth address
+    console.log("Calculating balances");
+    eth_address = document.getElementById('eth_address').value;
+    var pattern = /0x[a-fA-F0-9]{40}/;
+    var resultRegex = pattern.exec(eth_address);
+
+    if (resultRegex != null) {
+        // Recipient address
+        var recipientAddress = resultRegex[0];
+
+        // Timeperiod edge timestamp
+        initialTimePeriodTimestamp = await stakingTimeLockContract.initialStakingTimestamp(recipientAddress);
+        initialTimePeriodTimestampBN = new ethers.BigNumber.from(initialTimePeriodTimestamp);
+        stakingAmounts.setInitialTimePeriod(initialTimePeriodTimestampBN);
+
+
+        // Lock duration
+        timePeriodTimestamp = await stakingTimeLockContract.timePeriod();
+        timePeriodTimestampBN = new ethers.BigNumber.from(timePeriodTimestamp);
+        stakingAmounts.setTimePeriod(timePeriodTimestampBN);
+
+        // Lock duration
+        basisPoints = await stakingTimeLockContract.percentageBasisPoints();
+        basisPointsBN = new ethers.BigNumber.from(basisPoints);
+        stakingAmounts.setBasisPoints(basisPointsBN);
+
+        var unlockCommences = new Date((stakingAmounts.getTimePeriod().add(stakingAmounts.getInitialTimePeriod())) * 1000);
+
+        // Timeperiod edge timestamp
+        interestEarned = await stakingTimeLockContract.expectedInterest(recipientAddress);
+        interestEarnedBN = new ethers.BigNumber.from(interestEarned);
+        stakingAmounts.setInterestEarned(interestEarnedBN);
+
+        // How many ERC20 tokens does this user have in the original ERC20 contract?
+        erc20Balance = await erc20TimeLockContract.balanceOf(resultRegex[0]);
+        erc20BalanceBN = new ethers.BigNumber.from(erc20Balance);
+
+        // Balance locked 
+        stakingUsersBalance = await stakingTimeLockContract.balances(resultRegex[0]);
+        stakingUsersBalanceBN = new ethers.BigNumber.from(stakingUsersBalance);
+        stakingAmounts.setLocked(stakingUsersBalanceBN);
+        console.log("User's balance: " + stakingAmounts.getLocked());
+
+        // Populate UI with values
+        if (ethers.utils.formatEther(stakingAmounts.getLocked()) < 0.1 && ethers.utils.formatEther(stakingAmounts.getLocked()) > 0) {
+            document.getElementById("your_staked_tokens").innerHTML = "< 0.1";
+        } else {
+            document.getElementById("your_staked_tokens").innerHTML = ethers.utils.formatEther(stakingAmounts.getLocked());
+        }
+
+        if (ethers.utils.formatEther(stakingAmounts.getInterestEarned()) < 0.1 && ethers.utils.formatEther(stakingAmounts.getInterestEarned()) > 0) {
+            document.getElementById("your_interest_earned").innerHTML = "< 0.1";
+        } else {
+            document.getElementById("your_interest_earned").innerHTML = ethers.utils.formatEther(stakingAmounts.getInterestEarned());
+        }
+
+        document.getElementById("your_un-staking_date").innerHTML = unlockCommences.toLocaleString();
+
+        document.getElementById("interest_per_annum").innerHTML = stakingAmounts.getBasisPoints().div(100);
+
+        document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+        document.getElementById("pb").style.width = '100%';
+        sleep(1000).then(() => {
+            document.getElementById("pb").classList.remove("progress-bar-animated");
+            document.getElementById("button_calculate_balances").disabled = false;
+            //document.getElementById("button_lock_tokens").disabled = false;
+            document.getElementById("button_calculate_balances").value = "Refresh/Calculate Balances";
+            document.getElementById("pb").style.width = '0%';
+        });
+    } else {
         var toastResponse = JSON.stringify({
             avatar: "../images/favicon.ico",
-            text: "Unlocking commences at: " + unlockCommences.toLocaleString(),
+            text: "Not a valid Ethereum address!",
             duration: 10000,
             newWindow: true,
             close: true,
@@ -627,88 +266,8 @@ async function updateBalances() {
         });
         var toastObject = JSON.parse(toastResponse);
         Toastify(toastObject).showToast();
-    } else {
-        var toastResponse;
-
-        // Eth address
-        console.log("Calculating balances");
-        eth_address = document.getElementById('eth_address').value;
-        var pattern = /0x[a-fA-F0-9]{40}/;
-        var resultRegex = pattern.exec(eth_address);
-
-        if (resultRegex != null) {
-            // Recipient address
-            var recipientAddress = resultRegex[0];
-
-            // How many ERC20 tokens does this user have in the original ERC20 contract?
-            erc20Balance = await erc20TimeLockContract.balanceOf(resultRegex[0]);
-            erc20BalanceBN = new ethers.BigNumber.from(erc20Balance);
-
-            // Balance locked 
-            stakingUsersBalance = await stakingTimeLockContract.balances(resultRegex[0]);
-            stakingUsersBalanceBN = new ethers.BigNumber.from(stakingUsersBalance);
-            stakingAmounts.setLocked(stakingUsersBalanceBN);
-            console.log("User's balance: " + stakingAmounts.getLocked());
-
-            // Amount already unlocked
-            //stakingAlreadyUnlocked = await stakingTimeLockContract.alreadyWithdrawn(resultRegex[0]);
-            //stakingAlreadyUnlockedBN = new ethers.BigNumber.from(stakingAlreadyUnlocked);
-            //stakingAmounts.setUnlocked(stakingAlreadyUnlockedBN);
-            //console.log("Already unlocked: " + stakingAmounts.getUnlocked());
-
-            // Populate UI with values
-            if (ethers.utils.formatEther(stakingAmounts.getLocked()) < 0.1 && ethers.utils.formatEther(stakingAmounts.getLocked()) > 0) {
-                document.getElementById("locked").innerHTML = "< 0.1";
-            } else {
-                document.getElementById("locked").innerHTML = ethers.utils.formatEther(stakingAmounts.getLocked());
-            }
-            // We don't really need to know how many the user has already unlocked - so this section is commented out for now
-            //if (ethers.utils.formatEther(stakingAmounts.getUnlocked()) < 0.1 && ethers.utils.formatEther(stakingAmounts.getUnlocked()) > 0) {
-            //    document.getElementById("unlocked").innerHTML = "< 0.1";
-            //} else {
-            //    document.getElementById("unlocked").innerHTML = ethers.utils.formatEther(stakingAmounts.getUnlocked());
-            //}
-
-            // Calculate how many tokens are unlockable, given the current time period and how much time has elapsed so far        
-            if (stakingAmounts.getCurrentTime().gte(stakingAmounts.getTimePeriod())) {
-                // The maximum time period has passed, so all locked tokens are unlockable now and forever
-                stakingAmounts.setUnlockable(stakingAmounts.getLocked());
-                console.log("No time lock in place, all tokens are unlockable");
-            } else {
-                stakingAmounts.setUnlockable("0");
-            }
-            if (ethers.utils.formatEther(stakingAmounts.getUnlockable()) < 0.1 && ethers.utils.formatEther(stakingAmounts.getUnlockable()) > 0) {
-                document.getElementById("unlockable").innerHTML = "< 0.1";
-            } else {
-                document.getElementById("unlockable").innerHTML = ethers.utils.formatEther(stakingAmounts.getUnlockable());
-            }
-            document.getElementById("pb").style.transition = "all 0.1s linear 0s";
-            document.getElementById("pb").style.width = '100%';
-            sleep(1000).then(() => {
-                document.getElementById("pb").classList.remove("progress-bar-animated");
-                document.getElementById("button_calculate_balances").disabled = false;
-                document.getElementById("button_lock_tokens").disabled = false;
-                document.getElementById("button_unlock_tokens").disabled = false;
-                document.getElementById("button_calculate_balances").value = "Refresh/Calculate Balances";
-                document.getElementById("pb").style.width = '0%';
-            });
-        } else {
-            var toastResponse = JSON.stringify({
-                avatar: "../images/favicon.ico",
-                text: "Not a valid Ethereum address!",
-                duration: 10000,
-                newWindow: true,
-                close: true,
-                gravity: "top", // `top` or `bottom`
-                position: "right", // `left`, `center` or `right`
-                backgroundColor: "linear-gradient(to right, #FF6600, #FFA500)",
-                stopOnFocus: false, // Prevents dismissing of toast on hover
-                onClick: function() {} // Callback after click
-            });
-            var toastObject = JSON.parse(toastResponse);
-            Toastify(toastObject).showToast();
-        }
     }
+    
 }
 
 async function calculateBalances() {
