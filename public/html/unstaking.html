@@ -30,44 +30,12 @@
           <div class="Details" id="balance_text"><b>Account Address</b></div>
           <input class="full_width small" id="eth_address" type="text" value="Ethereum address">
           <br>
-          <br>
-          <button class="BalanceButton center" id="button_calculate_balances" onclick="calculateBalances()"><span class="hover-tipso-tooltip" data-tipso="Calculates and displays: a) the amount of currently locked tokens b) how many tokens are available to be unlocked (at this current point in time)">Refresh/Calculate Balances</span></button>
-          <br>
-          <div class="table-responsive">
-            <table class="table whiteText">
-              <thead>
-                <tr>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">Tokens Staked In This Contract</th>
-                  <td id="tokens_staked_in_this_contract"></td>
-                </tr>
-                <tr>
-                  <th scope="row">Tokens In Your Wallet</th>
-                  <td id="tokens_in_your_wallet"></td>
-                </tr>
-                <tr>
-                <tr>
-                  <th scope="row">Staking Time Period</th>
-                  <td id="staking_time_period"></td>
-                </tr>
-                <tr>
-                  <th scope="row">Your Un-Staking Date</th>
-                  <td id="your_un-staking_stake"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
           <hr>
           <br>
           <div class="container">
             <div class="row">
               <div class="col-sm">
-                          <button class="NavButton center" id="button_unlock_tokens" onclick="onButtonClickLock($('#eth_address').val())"><span class="hover-tipso-tooltip" data-tipso="This will unlock tokens in the smart contract (tokens and interest earned will become visible in your wallet)">Un-Stake Tokens</span></button>
+                          <button class="NavButton center" id="button_unlock_tokens" onclick="onButtonClickUnLock($('#eth_address').val())"><span class="hover-tipso-tooltip" data-tipso="This will unlock tokens in the smart contract (tokens and interest earned will become visible in your wallet)">Un-Stake Tokens</span></button>
               </div>
             </div>
             <br>
