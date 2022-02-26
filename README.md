@@ -54,4 +54,4 @@ To publish/deploy simply type
 npm run deploy
 ```
 
-The site will then be hosted to [https://second-state.github.io/interest-earner-user-interface/html/](https://second-state.github.io/interest-earner-user-interface/html/index.html)
+The site will then be hosted to [https://second-state.github.io/interest-earner-user-interface/html/index.html](https://second-state.github.io/interest-earner-user-interface/html/index.html)
