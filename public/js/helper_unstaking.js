@@ -190,11 +190,13 @@ async function onButtonClickUnLock() {
                     var toastObject = JSON.parse(toastResponse);
                     Toastify(toastObject).showToast();
                     // UI mods
-                    document.getElementById("pb").style.width = '0%';
-                    console.log("Disabling button");
-                    document.getElementById("button_unlock_tokens").disabled = true;
-                    document.getElementById("pb").style.transition = "all 30s linear 0s";
-                    document.getElementById("pb").style.width = '80%';
+                        sleep(1000).then(() => {
+                            document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                            document.getElementById("pb").style.width = '100%';
+                            document.getElementById("pb").classList.remove("progress-bar-animated");
+                            document.getElementById("button_unlock_tokens").disabled = false;
+                            document.getElementById("pb").style.width = '0%';
+                        });
                 });
             });
 

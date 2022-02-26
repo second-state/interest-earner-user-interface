@@ -30,6 +30,9 @@ class Amounts {
         this.basisPoints = new ethers.BigNumber.from('0');
         this.initialTimePeriod = new ethers.BigNumber.from('0');
         this.currentTime = new ethers.BigNumber.from('0');
+        this.totalStateStaked = new ethers.BigNumber.from('0');
+        this.reservePool = new ethers.BigNumber.from('0');
+        this.totalExpectedInterest = new ethers.BigNumber.from('0');
     }
 
     getLocked() {
@@ -52,12 +55,36 @@ class Amounts {
         return this.basisPoints;
     }
 
+    getReservePool() {
+        return this.reservePool;
+    }
+
+    getTotalStateStaked() {
+        return this.totalStateStaked;
+    }
+
+    getTotalExpectedInterest() {
+        return this.totalExpectedInterest;
+    }
+
     getInitialTimePeriod() {
         return this.initialTimePeriod;
     }
 
     getCurrentTime() {
         return this.currentTime;
+    }
+
+    setTotalExpectedInterest(_interestEarned) {
+        this.totalExpectedInterest = this.totalExpectedInterest.add(_interestEarned);
+    }
+
+    setTotalStateStaked(_totalStateStaked) {
+        this.totalStateStaked = _totalStateStaked;
+    }
+
+    setReservePool(_reservePool) {
+        this.reservePool = _reservePool;
     }
 
     setLocked(_locked) {
@@ -96,6 +123,9 @@ class Amounts {
         this.basisPoints = new ethers.BigNumber.from('0');
         this.initialTimePeriod = new ethers.BigNumber.from('0');
         this.currentTime = new ethers.BigNumber.from('0');
+        this.totalStateStaked = new ethers.BigNumber.from('0');
+        this.reservePool = new ethers.BigNumber.from('0');
+        this.totalExpectedInterest = new ethers.BigNumber.from('0');
     }
 }
 
@@ -224,6 +254,53 @@ async function onButtonClickLock() {
     }
     if (stateAmountInWei > 0) {
         if (stateAmountInWei > 315360000000 && stateAmountInWei < 11579208923731619542357098500868790785326998466564056403945758400791312963) {
+            
+/* TODO START
+Add setTotalStateStaked, setTotalExpectedInterest, setReservePool
+Perform the whole calculation here in the UI which will pre-detect whether the contract has enough reserve to proceed
+
+
+//// Solidity
+Essentially want to copy the following logic from Solidity and port that to JS below using the stakingAmounts class
+
+        uint256 interestEarnedPerAnnum_pre = amount.mul(percentageBasisPoints);
+        // We use basis points so that Ethereum's uint256 (which does not have decimals) can have percentages of 0.01% increments. The following line caters for the basis points offset
+        uint256 interestEarnedPerAnnum_post = interestEarnedPerAnnum_pre.div(10000);
+        // Let's calculate how many wei are earned per second
+        uint256 weiPerSecond = interestEarnedPerAnnum_post.div(31536000);
+        require(weiPerSecond > 0, "Interest on this amount is too low to calculate, please try a greater amount");
+        // Let's calculate the release date
+        uint256 releaseEpoch = initialStakingTimestamp[msg.sender].add(timePeriod);
+        // Let's fragment the interest earned per annum down to the remaining time left on this staking round
+        uint256 secondsRemaining = releaseEpoch.sub(block.timestamp);
+        // We must ensure that there is a quantifiable amount of time remaining (so we can calculate some interest; albeit proportional)
+        require(secondsRemaining > 0, "There is not enough time left to stake for this current round");
+        // There are 31536000 seconds per annum, so let's calculate the interest for this remaining time period
+        uint256 interestEarnedForThisStake = weiPerSecond.mul(secondsRemaining);
+        // Make sure that contract's reserve pool has enough to service this transaction. I.e. there is enough STATE in this contract to pay this user's interest (not including/counting any previous end user's staked STATE or interest which they will eventually take as a pay out)
+        require(token.balanceOf(address(this)) >= totalStateStaked.add(totalExpectedInterest).add(interestEarnedForThisStake), "Not enough STATE tokens in the reserve pool, please contact owner of this contract");
+
+//// Javascript equivalent
+            // Ensure that the contract has enough reserve pool for this user to proceed
+            // Staked State
+            totalStakedState = await stakingTimeLockContract.totalStateStaked();
+            totalStakedStateBN = new ethers.BigNumber.from(totalStakedState);
+            stakingAmounts.setTotalStateStaked(totalStakedStateBN);
+
+            // Interest earned by all
+            totalExpectedInterest = await stakingTimeLockContract.totalExpectedInterest();
+            totalExpectedInterestBN = new ethers.BigNumber.from(totalExpectedInterest);
+            stakingAmounts.setTotalExpectedInterest(totalExpectedInterestBN);
+
+            // How many ERC20 tokens does this smart contract have in the original ERC20 contract?
+            reservePool = await erc20TimeLockContract.balanceOf(interest_earner_contract_address.address);
+            reservePoolBN = new ethers.BigNumber.from(reservePool);
+            stakingAmounts.setReservePool(reservePoolBN);
+
+            if(stakingAmounts.getTotalStateStaked().add(stakingAmounts.getTotalExpectedInterest()))
+TODO END
+*/
+
             eth_address = document.getElementById('eth_address').value;
             console.log(eth_address);
             var pattern = /0x[a-fA-F0-9]{40}/;
@@ -330,7 +407,7 @@ async function onButtonClickLock() {
                                             approveResponse02.wait().then((approveResponse03) => {
                                                 var toastResponseApprove02 = JSON.stringify({
                                                     avatar: "../images/favicon.ico",
-                                                    text: "Tokens staked successfully!",
+                                                    text: "Congratulations, tokens are staked.",
                                                     duration: 10000,
                                                     newWindow: true,
                                                     close: true,
@@ -345,11 +422,13 @@ async function onButtonClickLock() {
                                                 // Automatically update balances
                                                 stakingAmounts.reset();
                                                 // UI mods
-                                                document.getElementById("pb").style.width = '0%';
-                                                console.log("Disabling button");
-                                                document.getElementById("button_lock_tokens").disabled = true;
-                                                document.getElementById("pb").style.transition = "all 30s linear 0s";
-                                                document.getElementById("pb").style.width = '80%';
+                                                sleep(1000).then(() => {
+                                                    document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                                                    document.getElementById("pb").style.width = '100%';
+                                                    document.getElementById("pb").classList.remove("progress-bar-animated");
+                                                    document.getElementById("button_unlock_tokens").disabled = false;
+                                                    document.getElementById("pb").style.width = '0%';
+                                                });
                                             });
                                         });
                                     });
@@ -423,11 +502,13 @@ async function onButtonClickLock() {
                                                         var toastObject = JSON.parse(toastResponseStake2);
                                                         Toastify(toastObject).showToast();
                                                         // UI mods
-                                                        document.getElementById("pb").style.width = '0%';
-                                                        console.log("Disabling button");
-                                                        document.getElementById("button_lock_tokens").disabled = true;
-                                                        document.getElementById("pb").style.transition = "all 30s linear 0s";
-                                                        document.getElementById("pb").style.width = '80%';
+                                                        sleep(1000).then(() => {
+                                                            document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                                                            document.getElementById("pb").style.width = '100%';
+                                                            document.getElementById("pb").classList.remove("progress-bar-animated");
+                                                            document.getElementById("button_unlock_tokens").disabled = false;
+                                                            document.getElementById("pb").style.width = '0%';
+                                                        });
                                                     });
                                                 });
                                             });
@@ -468,11 +549,13 @@ async function onButtonClickLock() {
                                         var toastObject = JSON.parse(toastResponseStake);
                                         Toastify(toastObject).showToast();
                                         // UI mods
-                                        document.getElementById("pb").style.width = '0%';
-                                        console.log("Disabling button");
-                                        document.getElementById("button_lock_tokens").disabled = true;
-                                        document.getElementById("pb").style.transition = "all 30s linear 0s";
-                                        document.getElementById("pb").style.width = '80%';
+                                        sleep(1000).then(() => {
+                                            document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                                            document.getElementById("pb").style.width = '100%';
+                                            document.getElementById("pb").classList.remove("progress-bar-animated");
+                                            document.getElementById("button_unlock_tokens").disabled = false;
+                                            document.getElementById("pb").style.width = '0%';
+                                        });
                                     });
                                 });
                             }
