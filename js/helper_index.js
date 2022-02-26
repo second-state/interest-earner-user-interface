@@ -130,6 +130,13 @@ async function connectWallet() {
         });
         var toastObject = JSON.parse(toastResponse);
         Toastify(toastObject).showToast();
+        sleep(1000).then(() => {
+        document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+        document.getElementById("pb").style.width = '100%';
+        document.getElementById("pb").classList.remove("progress-bar-animated");
+        document.getElementById("button_lock_tokens").disabled = false;
+        document.getElementById("pb").style.width = '0%';
+    });
     }
     if (addressOfSigner) {
         console.log("Address of signer: " + addressOfSigner);
@@ -262,7 +269,13 @@ async function updateBalances() {
         var toastObject = JSON.parse(toastResponse);
         Toastify(toastObject).showToast();
     }
-    
+    sleep(1000).then(() => {
+        document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+        document.getElementById("pb").style.width = '100%';
+        document.getElementById("pb").classList.remove("progress-bar-animated");
+        document.getElementById("button_lock_tokens").disabled = false;
+        document.getElementById("pb").style.width = '0%';
+    });
 }
 
 async function calculateBalances() {
