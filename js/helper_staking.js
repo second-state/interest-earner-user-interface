@@ -30,6 +30,9 @@ class Amounts {
         this.basisPoints = new ethers.BigNumber.from('0');
         this.initialTimePeriod = new ethers.BigNumber.from('0');
         this.currentTime = new ethers.BigNumber.from('0');
+        this.totalStateStaked = new ethers.BigNumber.from('0');
+        this.reservePool = new ethers.BigNumber.from('0');
+        this.totalExpectedInterest = new ethers.BigNumber.from('0');
     }
 
     getLocked() {
@@ -52,12 +55,36 @@ class Amounts {
         return this.basisPoints;
     }
 
+    getReservePool() {
+        return this.reservePool;
+    }
+
+    getTotalStateStaked() {
+        return this.totalStateStaked;
+    }
+
+    getTotalExpectedInterest() {
+        return this.totalExpectedInterest;
+    }
+
     getInitialTimePeriod() {
         return this.initialTimePeriod;
     }
 
     getCurrentTime() {
         return this.currentTime;
+    }
+
+    setTotalExpectedInterest(_interestEarned) {
+        this.totalExpectedInterest = _interestEarned;
+    }
+
+    setTotalStateStaked(_totalStateStaked) {
+        this.totalStateStaked = _totalStateStaked;
+    }
+
+    setReservePool(_reservePool) {
+        this.reservePool = _reservePool;
     }
 
     setLocked(_locked) {
@@ -96,6 +123,9 @@ class Amounts {
         this.basisPoints = new ethers.BigNumber.from('0');
         this.initialTimePeriod = new ethers.BigNumber.from('0');
         this.currentTime = new ethers.BigNumber.from('0');
+        this.totalStateStaked = new ethers.BigNumber.from('0');
+        this.reservePool = new ethers.BigNumber.from('0');
+        this.totalExpectedInterest = new ethers.BigNumber.from('0');
     }
 }
 
@@ -224,6 +254,7 @@ async function onButtonClickLock() {
     }
     if (stateAmountInWei > 0) {
         if (stateAmountInWei > 315360000000 && stateAmountInWei < 11579208923731619542357098500868790785326998466564056403945758400791312963) {
+
             eth_address = document.getElementById('eth_address').value;
             console.log(eth_address);
             var pattern = /0x[a-fA-F0-9]{40}/;
@@ -242,42 +273,68 @@ async function onButtonClickLock() {
                 timePeriodTimestampBN = new ethers.BigNumber.from(timePeriodTimestamp);
                 stakingAmounts.setTimePeriod(timePeriodTimestampBN);
 
-                if (stakingAmounts.getInitialTimePeriod() == 0 || stakingAmounts.getCurrentTime() < stakingAmounts.getTimePeriod().add(stakingAmounts.getInitialTimePeriod())) {
+                // Ensure that the contract has enough reserve pool for this user to proceed
+                // Staked State
+                totalStakedState = await stakingTimeLockContract.totalStateStaked();
+                totalStakedStateBN = new ethers.BigNumber.from(totalStakedState);
+                stakingAmounts.setTotalStateStaked(totalStakedStateBN);
 
-                    // Check user ERC20 balance in ERC20 contract
-                    erc20Balance = await erc20TimeLockContract.balanceOf(resultRegex[0]);
-                    erc20BalanceBN = new ethers.BigNumber.from(erc20Balance);
-                    console.log("User's balance: " + erc20Balance);
+                // Interest earned by all
+                totalExpectedInterest = await stakingTimeLockContract.totalExpectedInterest();
+                totalExpectedInterestBN = new ethers.BigNumber.from(totalExpectedInterest);
+                stakingAmounts.setTotalExpectedInterest(totalExpectedInterestBN);
 
-                    // Check to see if user has enough tokens to stake
-                    if (stateAmountInWei.lte(erc20BalanceBN)) {
-                        console.log("User's balance is sufficient");
-                        // Check allowance i.e. has this user approved the staking contract to transferFrom?
-                        erc20TimeLockContract.allowance(resultRegex[0], interest_earner_contract_address.address).then((allowanceResponse00) => {
-                            erc20ApprovalBalanceBN = new ethers.BigNumber.from(allowanceResponse00);
+                // How many ERC20 tokens does this smart contract have in the original ERC20 contract?
+                reservePool = await erc20TimeLockContract.balanceOf(interest_earner_contract_address.address);
+                reservePoolBN = new ethers.BigNumber.from(reservePool);
+                stakingAmounts.setReservePool(reservePoolBN);
 
-                            // Set approval to zero first (in the event that we need to increase the approved amount for this upcoming transaction)
-                            // First create a zero BN
-                            erc20ZeroValueBN = new ethers.BigNumber.from("0");
-                            if (erc20ApprovalBalanceBN.eq(erc20ZeroValueBN)) {
-                                var toastResponseApprove = JSON.stringify({
-                                    avatar: "../images/favicon.ico",
-                                    text: "Staking contract approval is required, please approve.",
-                                    duration: 10000,
-                                    newWindow: true,
-                                    close: true,
-                                    gravity: "top", // `top` or `bottom`
-                                    position: "left", // `left`, `center` or `right`
-                                    backgroundColor: "linear-gradient(to right, #green, #607D3B)",
-                                    stopOnFocus: false, // Prevents dismissing of toast on hover
-                                    onClick: function() {} // Callback after click
-                                });
-                                var toastObject = JSON.parse(toastResponseApprove);
-                                Toastify(toastObject).showToast();
-                                erc20TimeLockContract.approve(interest_earner_contract_address.address, stateAmountInWei).then((approveResponse00) => {
-                                    var toastResponseApprove0 = JSON.stringify({
+                // Basis points
+                basisPoints = await stakingTimeLockContract.percentageBasisPoints();
+                basisPointsBN = new ethers.BigNumber.from(basisPoints);
+                stakingAmounts.setBasisPoints(basisPointsBN);
+
+                // Calculate how much interest the reserve needs to hold
+                var preInterest = stateAmountInWei.mul(stakingAmounts.getBasisPoints());
+                var postInterest = preInterest.div(10000);
+                var weiPerSecond = postInterest.div(31536000);
+                var releaseEpoch;
+                if(stakingAmounts.getInitialTimePeriod().eq(0)){
+                    releaseEpoch = stakingAmounts.getCurrentTime().add(stakingAmounts.getTimePeriod());
+                } else if (stakingAmounts.getInitialTimePeriod().gt(0)){
+                    releaseEpoch = stakingAmounts.getInitialTimePeriod().add(stakingAmounts.getTimePeriod());
+                }
+                var secondsRemaining = releaseEpoch.sub(stakingAmounts.getCurrentTime());
+                var interestEaredForThisStake = weiPerSecond.mul(secondsRemaining);
+                console.log(stakingAmounts.getTotalStateStaked().toString());
+                console.log(stakingAmounts.getTotalExpectedInterest().toString());
+                console.log(interestEaredForThisStake.toString());
+                console.log(stakingAmounts.getReservePool().toString());
+
+                if (stakingAmounts.getTotalStateStaked().add(stakingAmounts.getTotalExpectedInterest()).add(interestEaredForThisStake).lte(stakingAmounts.getReservePool())) {
+
+
+                    if (stakingAmounts.getInitialTimePeriod() == 0 || stakingAmounts.getCurrentTime() < stakingAmounts.getTimePeriod().add(stakingAmounts.getInitialTimePeriod())) {
+
+                        // Check user ERC20 balance in ERC20 contract
+                        erc20Balance = await erc20TimeLockContract.balanceOf(resultRegex[0]);
+                        erc20BalanceBN = new ethers.BigNumber.from(erc20Balance);
+                        console.log("User's balance: " + erc20Balance);
+
+                        // Check to see if user has enough tokens to stake
+                        if (stateAmountInWei.lte(erc20BalanceBN)) {
+                            console.log("User's balance is sufficient");
+                            // Check allowance i.e. has this user approved the staking contract to transferFrom?
+                            erc20TimeLockContract.allowance(resultRegex[0], interest_earner_contract_address.address).then((allowanceResponse00) => {
+                                erc20ApprovalBalanceBN = new ethers.BigNumber.from(allowanceResponse00);
+
+                                // Set approval to zero first (in the event that we need to increase the approved amount for this upcoming transaction)
+                                // First create a zero BN
+                                erc20ZeroValueBN = new ethers.BigNumber.from("0");
+                                if (erc20ApprovalBalanceBN.eq(erc20ZeroValueBN)) {
+                                    var toastResponseApprove = JSON.stringify({
                                         avatar: "../images/favicon.ico",
-                                        text: "Waiting for transaction confirmation",
+                                        text: "Staking contract approval is required, please approve.",
                                         duration: 10000,
                                         newWindow: true,
                                         close: true,
@@ -287,16 +344,12 @@ async function onButtonClickLock() {
                                         stopOnFocus: false, // Prevents dismissing of toast on hover
                                         onClick: function() {} // Callback after click
                                     });
-                                    var toastObject = JSON.parse(toastResponseApprove0);
+                                    var toastObject = JSON.parse(toastResponseApprove);
                                     Toastify(toastObject).showToast();
-                                    // Wait for transaction to complete
-                                    console.log("Waiting for receipt in relation to setting approval from zero to " + stateAmountInWei);
-                                    console.log(approveResponse00);
-                                    console.log("Receipt delivered!");
-                                    approveResponse00.wait().then((approveResponse01) => {
-                                        var toastResponseApprove01 = JSON.stringify({
+                                    erc20TimeLockContract.approve(interest_earner_contract_address.address, stateAmountInWei).then((approveResponse00) => {
+                                        var toastResponseApprove0 = JSON.stringify({
                                             avatar: "../images/favicon.ico",
-                                            text: "Approval granted!",
+                                            text: "Waiting for transaction confirmation",
                                             duration: 10000,
                                             newWindow: true,
                                             close: true,
@@ -306,15 +359,16 @@ async function onButtonClickLock() {
                                             stopOnFocus: false, // Prevents dismissing of toast on hover
                                             onClick: function() {} // Callback after click
                                         });
-                                        var toastObject = JSON.parse(toastResponseApprove01);
+                                        var toastObject = JSON.parse(toastResponseApprove0);
                                         Toastify(toastObject).showToast();
-                                        console.log("Confirmed!!!");
-                                        // Now go ahead and stake the tokens
-                                        console.log("Locking tokens, please wait ...");
-                                        stakingTimeLockContract.stakeTokens(erc20_contract_address.address, stateAmountInWei).then((approveResponse02) => {
-                                            var toastResponse = JSON.stringify({
+                                        // Wait for transaction to complete
+                                        console.log("Waiting for receipt in relation to setting approval from zero to " + stateAmountInWei);
+                                        console.log(approveResponse00);
+                                        console.log("Receipt delivered!");
+                                        approveResponse00.wait().then((approveResponse01) => {
+                                            var toastResponseApprove01 = JSON.stringify({
                                                 avatar: "../images/favicon.ico",
-                                                text: "Waiting for transaction confirmation",
+                                                text: "Approval granted!",
                                                 duration: 10000,
                                                 newWindow: true,
                                                 close: true,
@@ -324,13 +378,15 @@ async function onButtonClickLock() {
                                                 stopOnFocus: false, // Prevents dismissing of toast on hover
                                                 onClick: function() {} // Callback after click
                                             });
-                                            var toastObject = JSON.parse(toastResponse);
+                                            var toastObject = JSON.parse(toastResponseApprove01);
                                             Toastify(toastObject).showToast();
-                                            console.log("Waiting for staking transaction to be confirmed");
-                                            approveResponse02.wait().then((approveResponse03) => {
-                                                var toastResponseApprove02 = JSON.stringify({
+                                            console.log("Confirmed!!!");
+                                            // Now go ahead and stake the tokens
+                                            console.log("Locking tokens, please wait ...");
+                                            stakingTimeLockContract.stakeTokens(erc20_contract_address.address, stateAmountInWei).then((approveResponse02) => {
+                                                var toastResponse = JSON.stringify({
                                                     avatar: "../images/favicon.ico",
-                                                    text: "Tokens staked successfully!",
+                                                    text: "Waiting for transaction confirmation",
                                                     duration: 10000,
                                                     newWindow: true,
                                                     close: true,
@@ -340,153 +396,191 @@ async function onButtonClickLock() {
                                                     stopOnFocus: false, // Prevents dismissing of toast on hover
                                                     onClick: function() {} // Callback after click
                                                 });
-                                                var toastObject = JSON.parse(toastResponseApprove02);
+                                                var toastObject = JSON.parse(toastResponse);
                                                 Toastify(toastObject).showToast();
-                                                // Automatically update balances
-                                                stakingAmounts.reset();
-                                                // UI mods
-                                                document.getElementById("pb").style.width = '0%';
-                                                console.log("Disabling button");
-                                                document.getElementById("button_lock_tokens").disabled = true;
-                                                document.getElementById("pb").style.transition = "all 30s linear 0s";
-                                                document.getElementById("pb").style.width = '80%';
-                                            });
-                                        });
-                                    });
-                                });
-
-                            } else if (erc20ApprovalBalanceBN.gt(erc20ZeroValueBN) && erc20ApprovalBalanceBN.lt(stateAmountInWei)) {
-                                // Setting approval to zero before increasing
-                                var toastResponseApprove2 = JSON.stringify({
-                                    avatar: "../images/favicon.ico",
-                                    text: "Setting approval to zero first, this will just take a minute",
-                                    duration: 10000,
-                                    newWindow: true,
-                                    close: true,
-                                    gravity: "top", // `top` or `bottom`
-                                    position: "left", // `left`, `center` or `right`
-                                    backgroundColor: "linear-gradient(to right, #green, #607D3B)",
-                                    stopOnFocus: false, // Prevents dismissing of toast on hover
-                                    onClick: function() {} // Callback after click
-                                });
-                                var toastObject = JSON.parse(toastResponseApprove2);
-                                Toastify(toastObject).showToast();
-                                erc20TimeLockContract.approve(interest_earner_contract_address.address, erc20ZeroValueBN).then((approveResponse04) => {
-                                    approveResponse04.wait().then((approveResponse05) => {
-                                        // Now we can go ahead and set the approval amount to the correct amount for this specific transaction
-                                        var toastResponseApprove3 = JSON.stringify({
-                                            avatar: "../images/favicon.ico",
-                                            text: "Setting approval to " + stateAmountInWei + " please approve",
-                                            duration: 10000,
-                                            newWindow: true,
-                                            close: true,
-                                            gravity: "top", // `top` or `bottom`
-                                            position: "left", // `left`, `center` or `right`
-                                            backgroundColor: "linear-gradient(to right, #green, #607D3B)",
-                                            stopOnFocus: false, // Prevents dismissing of toast on hover
-                                            onClick: function() {} // Callback after click
-                                        });
-                                        var toastObject = JSON.parse(toastResponseApprove3);
-                                        Toastify(toastObject).showToast();
-                                        erc20TimeLockContract.approve(interest_earner_contract_address.address, stateAmountInWei).then((approveResponse06) => {
-                                            approveResponse06.wait().then((approveResponse07) => {
-                                                var toastResponseStake = JSON.stringify({
-                                                    avatar: "../images/favicon.ico",
-                                                    text: "Staking " + stateAmountInWei + ", please approve",
-                                                    duration: 10000,
-                                                    newWindow: true,
-                                                    close: true,
-                                                    gravity: "top", // `top` or `bottom`
-                                                    position: "left", // `left`, `center` or `right`
-                                                    backgroundColor: "linear-gradient(to right, #green, #607D3B)",
-                                                    stopOnFocus: false, // Prevents dismissing of toast on hover
-                                                    onClick: function() {} // Callback after click
-                                                });
-                                                var toastObject = JSON.parse(toastResponseStake);
-                                                Toastify(toastObject).showToast();
-                                                stakingTimeLockContract.stakeTokens(erc20_contract_address.address, stateAmountInWei).then((approveResponse08) => {
-                                                    approveResponse08.wait().then((approveResponse09) => {
-                                                        // Automatically update balances
-                                                        stakingAmounts.reset();
-                                                        var toastResponseStake2 = JSON.stringify({
-                                                            avatar: "../images/favicon.ico",
-                                                            text: "Congratulations, tokens are staked.",
-                                                            duration: 10000,
-                                                            newWindow: true,
-                                                            close: true,
-                                                            gravity: "top", // `top` or `bottom`
-                                                            position: "left", // `left`, `center` or `right`
-                                                            backgroundColor: "linear-gradient(to right, #green, #607D3B)",
-                                                            stopOnFocus: false, // Prevents dismissing of toast on hover
-                                                            onClick: function() {} // Callback after click
-                                                        });
-                                                        var toastObject = JSON.parse(toastResponseStake2);
-                                                        Toastify(toastObject).showToast();
-                                                        // UI mods
+                                                console.log("Waiting for staking transaction to be confirmed");
+                                                approveResponse02.wait().then((approveResponse03) => {
+                                                    var toastResponseApprove02 = JSON.stringify({
+                                                        avatar: "../images/favicon.ico",
+                                                        text: "Congratulations, tokens are staked.",
+                                                        duration: 10000,
+                                                        newWindow: true,
+                                                        close: true,
+                                                        gravity: "top", // `top` or `bottom`
+                                                        position: "left", // `left`, `center` or `right`
+                                                        backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                                                        stopOnFocus: false, // Prevents dismissing of toast on hover
+                                                        onClick: function() {} // Callback after click
+                                                    });
+                                                    var toastObject = JSON.parse(toastResponseApprove02);
+                                                    Toastify(toastObject).showToast();
+                                                    // Automatically update balances
+                                                    stakingAmounts.reset();
+                                                    // UI mods
+                                                    sleep(1000).then(() => {
+                                                        document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                                                        document.getElementById("pb").style.width = '100%';
+                                                        document.getElementById("pb").classList.remove("progress-bar-animated");
+                                                        document.getElementById("button_lock_tokens").disabled = false;
                                                         document.getElementById("pb").style.width = '0%';
-                                                        console.log("Disabling button");
-                                                        document.getElementById("button_lock_tokens").disabled = true;
-                                                        document.getElementById("pb").style.transition = "all 30s linear 0s";
-                                                        document.getElementById("pb").style.width = '80%';
                                                     });
                                                 });
                                             });
                                         });
                                     });
-                                });
-                            } else if ((erc20ApprovalBalanceBN.gt(erc20ZeroValueBN) && erc20ApprovalBalanceBN.gte(stateAmountInWei))) {
-                                var toastResponseStake = JSON.stringify({
-                                    avatar: "../images/favicon.ico",
-                                    text: "Staking " + stateAmountInWei + ", please approve",
-                                    duration: 10000,
-                                    newWindow: true,
-                                    close: true,
-                                    gravity: "top", // `top` or `bottom`
-                                    position: "left", // `left`, `center` or `right`
-                                    backgroundColor: "linear-gradient(to right, #green, #607D3B)",
-                                    stopOnFocus: false, // Prevents dismissing of toast on hover
-                                    onClick: function() {} // Callback after click
-                                });
-                                var toastObject = JSON.parse(toastResponseStake);
-                                Toastify(toastObject).showToast();
-                                stakingTimeLockContract.stakeTokens(erc20_contract_address.address, stateAmountInWei).then((approveResponse08) => {
-                                    approveResponse08.wait().then((approveResponse09) => {
-                                        // Automatically update balances
-                                        stakingAmounts.reset();
-                                        var toastResponseStake = JSON.stringify({
-                                            avatar: "../images/favicon.ico",
-                                            text: "Congratulations, tokens are staked.",
-                                            duration: 10000,
-                                            newWindow: true,
-                                            close: true,
-                                            gravity: "top", // `top` or `bottom`
-                                            position: "left", // `left`, `center` or `right`
-                                            backgroundColor: "linear-gradient(to right, #green, #607D3B)",
-                                            stopOnFocus: false, // Prevents dismissing of toast on hover
-                                            onClick: function() {} // Callback after click
-                                        });
-                                        var toastObject = JSON.parse(toastResponseStake);
-                                        Toastify(toastObject).showToast();
-                                        // UI mods
-                                        document.getElementById("pb").style.width = '0%';
-                                        console.log("Disabling button");
-                                        document.getElementById("button_lock_tokens").disabled = true;
-                                        document.getElementById("pb").style.transition = "all 30s linear 0s";
-                                        document.getElementById("pb").style.width = '80%';
+
+                                } else if (erc20ApprovalBalanceBN.gt(erc20ZeroValueBN) && erc20ApprovalBalanceBN.lt(stateAmountInWei)) {
+                                    // Setting approval to zero before increasing
+                                    var toastResponseApprove2 = JSON.stringify({
+                                        avatar: "../images/favicon.ico",
+                                        text: "Setting approval to zero first, this will just take a minute",
+                                        duration: 10000,
+                                        newWindow: true,
+                                        close: true,
+                                        gravity: "top", // `top` or `bottom`
+                                        position: "left", // `left`, `center` or `right`
+                                        backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                                        stopOnFocus: false, // Prevents dismissing of toast on hover
+                                        onClick: function() {} // Callback after click
                                     });
-                                });
-                            }
-                        });
+                                    var toastObject = JSON.parse(toastResponseApprove2);
+                                    Toastify(toastObject).showToast();
+                                    erc20TimeLockContract.approve(interest_earner_contract_address.address, erc20ZeroValueBN).then((approveResponse04) => {
+                                        approveResponse04.wait().then((approveResponse05) => {
+                                            // Now we can go ahead and set the approval amount to the correct amount for this specific transaction
+                                            var toastResponseApprove3 = JSON.stringify({
+                                                avatar: "../images/favicon.ico",
+                                                text: "Setting approval to " + stateAmountInWei + " please approve",
+                                                duration: 10000,
+                                                newWindow: true,
+                                                close: true,
+                                                gravity: "top", // `top` or `bottom`
+                                                position: "left", // `left`, `center` or `right`
+                                                backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                                                stopOnFocus: false, // Prevents dismissing of toast on hover
+                                                onClick: function() {} // Callback after click
+                                            });
+                                            var toastObject = JSON.parse(toastResponseApprove3);
+                                            Toastify(toastObject).showToast();
+                                            erc20TimeLockContract.approve(interest_earner_contract_address.address, stateAmountInWei).then((approveResponse06) => {
+                                                approveResponse06.wait().then((approveResponse07) => {
+                                                    var toastResponseStake = JSON.stringify({
+                                                        avatar: "../images/favicon.ico",
+                                                        text: "Staking " + stateAmountInWei + ", please approve",
+                                                        duration: 10000,
+                                                        newWindow: true,
+                                                        close: true,
+                                                        gravity: "top", // `top` or `bottom`
+                                                        position: "left", // `left`, `center` or `right`
+                                                        backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                                                        stopOnFocus: false, // Prevents dismissing of toast on hover
+                                                        onClick: function() {} // Callback after click
+                                                    });
+                                                    var toastObject = JSON.parse(toastResponseStake);
+                                                    Toastify(toastObject).showToast();
+                                                    stakingTimeLockContract.stakeTokens(erc20_contract_address.address, stateAmountInWei).then((approveResponse08) => {
+                                                        approveResponse08.wait().then((approveResponse09) => {
+                                                            // Automatically update balances
+                                                            stakingAmounts.reset();
+                                                            var toastResponseStake2 = JSON.stringify({
+                                                                avatar: "../images/favicon.ico",
+                                                                text: "Congratulations, tokens are staked.",
+                                                                duration: 10000,
+                                                                newWindow: true,
+                                                                close: true,
+                                                                gravity: "top", // `top` or `bottom`
+                                                                position: "left", // `left`, `center` or `right`
+                                                                backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                                                                stopOnFocus: false, // Prevents dismissing of toast on hover
+                                                                onClick: function() {} // Callback after click
+                                                            });
+                                                            var toastObject = JSON.parse(toastResponseStake2);
+                                                            Toastify(toastObject).showToast();
+                                                            // UI mods
+                                                            sleep(1000).then(() => {
+                                                                document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                                                                document.getElementById("pb").style.width = '100%';
+                                                                document.getElementById("pb").classList.remove("progress-bar-animated");
+                                                                document.getElementById("button_lock_tokens").disabled = false;
+                                                                document.getElementById("pb").style.width = '0%';
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                } else if ((erc20ApprovalBalanceBN.gt(erc20ZeroValueBN) && erc20ApprovalBalanceBN.gte(stateAmountInWei))) {
+                                    var toastResponseStake = JSON.stringify({
+                                        avatar: "../images/favicon.ico",
+                                        text: "Staking " + stateAmountInWei + ", please approve",
+                                        duration: 10000,
+                                        newWindow: true,
+                                        close: true,
+                                        gravity: "top", // `top` or `bottom`
+                                        position: "left", // `left`, `center` or `right`
+                                        backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                                        stopOnFocus: false, // Prevents dismissing of toast on hover
+                                        onClick: function() {} // Callback after click
+                                    });
+                                    var toastObject = JSON.parse(toastResponseStake);
+                                    Toastify(toastObject).showToast();
+                                    stakingTimeLockContract.stakeTokens(erc20_contract_address.address, stateAmountInWei).then((approveResponse08) => {
+                                        approveResponse08.wait().then((approveResponse09) => {
+                                            // Automatically update balances
+                                            stakingAmounts.reset();
+                                            var toastResponseStake = JSON.stringify({
+                                                avatar: "../images/favicon.ico",
+                                                text: "Congratulations, tokens are staked.",
+                                                duration: 10000,
+                                                newWindow: true,
+                                                close: true,
+                                                gravity: "top", // `top` or `bottom`
+                                                position: "left", // `left`, `center` or `right`
+                                                backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                                                stopOnFocus: false, // Prevents dismissing of toast on hover
+                                                onClick: function() {} // Callback after click
+                                            });
+                                            var toastObject = JSON.parse(toastResponseStake);
+                                            Toastify(toastObject).showToast();
+                                            // UI mods
+                                            sleep(1000).then(() => {
+                                                document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                                                document.getElementById("pb").style.width = '100%';
+                                                document.getElementById("pb").classList.remove("progress-bar-animated");
+                                                document.getElementById("button_lock_tokens").disabled = false;
+                                                document.getElementById("pb").style.width = '0%';
+                                            });
+                                        });
+                                    });
+                                }
+                            });
+                        } else {
+                            var toastResponse = JSON.stringify({
+                                avatar: "../images/favicon.ico",
+                                text: "insufficient ERC20 token balance!",
+                                duration: 10000,
+                                newWindow: true,
+                                close: true,
+                                gravity: "top", // `top` or `bottom`
+                                position: "right", // `left`, `center` or `right`
+                                backgroundColor: "linear-gradient(to right, #454A21, #607D3B)",
+                                stopOnFocus: false, // Prevents dismissing of toast on hover
+                                onClick: function() {} // Callback after click
+                            });
+                            var toastObject = JSON.parse(toastResponse);
+                            Toastify(toastObject).showToast();
+                        }
                     } else {
                         var toastResponse = JSON.stringify({
                             avatar: "../images/favicon.ico",
-                            text: "insufficient ERC20 token balance!",
+                            text: "This round has already ended! Please un-stake existing tokens and then try again",
                             duration: 10000,
                             newWindow: true,
                             close: true,
                             gravity: "top", // `top` or `bottom`
                             position: "right", // `left`, `center` or `right`
-                            backgroundColor: "linear-gradient(to right, #454A21, #607D3B)",
+                            backgroundColor: "linear-gradient(to right, #FF6600, #FFA500)",
                             stopOnFocus: false, // Prevents dismissing of toast on hover
                             onClick: function() {} // Callback after click
                         });
@@ -496,7 +590,7 @@ async function onButtonClickLock() {
                 } else {
                     var toastResponse = JSON.stringify({
                         avatar: "../images/favicon.ico",
-                        text: "This round has already ended! Please un-stake existing tokens and then try again",
+                        text: "Not enough STATE in the reserve pool, please contact the contract's owner",
                         duration: 10000,
                         newWindow: true,
                         close: true,
@@ -509,7 +603,6 @@ async function onButtonClickLock() {
                     var toastObject = JSON.parse(toastResponse);
                     Toastify(toastObject).showToast();
                 }
-
 
             } else {
                 var toastResponse = JSON.stringify({
