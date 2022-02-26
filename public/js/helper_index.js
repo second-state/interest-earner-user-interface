@@ -231,9 +231,12 @@ async function updateBalances() {
             document.getElementById("your_interest_earned").innerHTML = ethers.utils.formatEther(stakingAmounts.getInterestEarned());
         }
 
-        document.getElementById("your_un-staking_date").innerHTML = unlockCommences.toLocaleString();
-
-        document.getElementById("interest_per_annum").innerHTML = stakingAmounts.getBasisPoints().div(100);
+        if (stakingAmounts.getInitialTimePeriod() == 0){
+            document.getElementById("your_un-staking_date").innerHTML = "N/A"
+        } else {
+            document.getElementById("your_un-staking_date").innerHTML = unlockCommences.toLocaleString();
+        }
+        document.getElementById("interest_per_annum").innerHTML = stakingAmounts.getBasisPoints().div(100) + "%";
 
         document.getElementById("pb").style.transition = "all 0.1s linear 0s";
         document.getElementById("pb").style.width = '100%';

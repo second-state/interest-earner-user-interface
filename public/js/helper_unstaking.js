@@ -158,13 +158,26 @@ async function onButtonClickUnLock() {
 
 
         if (stakingAmounts.getInitialTimePeriod() != 0 && stakingAmounts.getCurrentTime() > stakingAmounts.getTimePeriod().add(stakingAmounts.getInitialTimePeriod())) {
-
+            var toastResponse = JSON.stringify({
+                avatar: "../images/favicon.ico",
+                text: "Un-staking & withdrawing interest earned, please wait",
+                duration: 10000,
+                newWindow: true,
+                close: true,
+                gravity: "top", // `top` or `bottom`
+                position: "left", // `left`, `center` or `right`
+                backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                stopOnFocus: false, // Prevents dismissing of toast on hover
+                onClick: function() {} // Callback after click
+            });
+            var toastObject = JSON.parse(toastResponse);
+            Toastify(toastObject).showToast();
             // Now we can go ahead and unstake the tokens
             stakingTimeLockContract.unstakeAllTokensAndWithdrawInterestEarned(erc20_contract_address.address).then((unlockResponse) => {
                 unlockResponse.wait().then((unlockResponse01) => {
                     var toastResponse = JSON.stringify({
                         avatar: "../images/favicon.ico",
-                        text: "Congratulations, tokens un-locked!",
+                        text: "Congratulations, tokens un-staked & interest withdrawn!",
                         duration: 10000,
                         newWindow: true,
                         close: true,

@@ -186,7 +186,7 @@ async function updateBalances() {
 
     document.getElementById("time_period_per_round").innerHTML = stakingAmounts.getTimePeriod();
 
-    document.getElementById("interest_per_annum").innerHTML = stakingAmounts.getBasisPoints().div(100);
+    document.getElementById("interest_per_annum").innerHTML = stakingAmounts.getBasisPoints().div(100) + "%";
 
     if (ethers.utils.formatEther(stakingAmounts.getTotalStateStaked()) < 0.1 && ethers.utils.formatEther(stakingAmounts.getTotalStateStaked()) > 0) {
         document.getElementById("total_staked_tokens").innerHTML = "< 0.1";
