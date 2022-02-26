@@ -14,11 +14,7 @@ The user then simply types in the amount of tokens they would like to stake
 
 The user then clicks the "Stake Tokens" button  
 
-It is recommended to also click the "Refresh/Calculate Balances" button after any transfers
-
 ## Unstaking tokens
-
-The user clicks the calculate balances button to see if any tokens are eligable for unstaking
 
 The user clicks the "Unstake Tokens" button
 
@@ -36,11 +32,11 @@ git clone git@github.com:second-state/interest-earner-user-interface.git
 
 ## ABI and address of interest earner contract
 
-Paste the ABI **and the address** of the interest earner contract's successfully deployed contract instance, into the helper.js file
+Paste the ABI into the `interest_earner_abi.json` file and the address of the interest earner contract's successfully deployed contract instance into the `interest_earner_contract_address.json` file.
 
 ## Contract address of ERC20 contract (NOT staking contract)
 
-In addition to that, also paste the contract address and ABI of the **ERC20 contract** into the helper.js file. You will see the two addresses are clearly marked.
+Paste the ABI into the `erc20_abi.json` file and the address of the ERC20's successfully deployed contract instance into the `erc20_contract_address.json` file.
 
 ## Installing
 
@@ -58,4 +54,4 @@ To publish/deploy simply type
 npm run deploy
 ```
 
-The site will then be hosted to [https://second-state.github.io/interest-earner-user-interface/html/](https://second-state.github.io/interest-earner-user-interface/html/)
+The site will then be hosted to [https://second-state.github.io/interest-earner-user-interface/html/](https://second-state.github.io/interest-earner-user-interface/html/index.html)
