@@ -195,8 +195,9 @@ async function updateBalances() {
     }
     console.log("Sum" + stakingAmounts.getTotalStateStaked().add(stakingAmounts.getTotalExpectedInterest()));
     console.log("Sum" + stakingAmounts.getReservePool());
-    // Create red text if the contract's owner is 1 Eth away from not having enough reserve for new users to stake
-    if (stakingAmounts.getTotalStateStaked().add(stakingAmounts.getTotalExpectedInterest()).gt(stakingAmounts.getReservePool())){
+    // Create red text if the contract's owner is 1 Eth denomination away from not having enough reserve for new users to stake
+    var tolerance = new ethers.BigNumber.from('1000000000000000000');
+    if (stakingAmounts.getTotalStateStaked().add(stakingAmounts.getTotalExpectedInterest()).add(tolerance).gte(stakingAmounts.getReservePool())){
         document.getElementById("contracts_reserve_pool").style.color = "red";
     } else {
         document.getElementById("contracts_reserve_pool").style.color = "white"; 
