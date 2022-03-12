@@ -48,10 +48,29 @@ npm install
 
 ## Running
 
-To publish/deploy simply type
+### Run on local
+
+To run on local system, type
+
+```
+node server.js
+```
+
+The site will then be hosted at `http://localhost/`
+
+### GitHub pages
+
+To publish/deploy on GitHub pages, simply type
 
 ```
 npm run deploy
 ```
 
 The site will then be hosted to [https://second-state.github.io/interest-earner-user-interface/html/index.html](https://second-state.github.io/interest-earner-user-interface/html/index.html)
+
+## Usage
+
+Just browse to the URL where the UI is hosted and ensure that your MetaMask wallet is configured to run on the same network (where the contracts are deployed). Default is Ethereum mainnet.
+
+<img width="872" alt="Screen Shot 2022-03-12 at 2 08 53 pm" src="https://user-images.githubusercontent.com/9831342/158003150-4440082e-9152-43a6-b226-9b762a88638f.png">
+
