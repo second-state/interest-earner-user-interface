@@ -514,3 +514,102 @@ color: white;
       height: 20px;
   }
 }
+
+// Disclaimer
+.msa-box {
+  width: 140px;
+  margin: 0 auto;
+  background: rgba(255,255,255);
+  padding: 3px;
+  border: 2px solid #fff;
+  background-clip: padding-box;
+  text-align: center;
+}
+
+.msa-button {
+  font-size: .6em;
+  padding: 10px;
+  color: #CECECE;
+  border: 1px solid #CECECE;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.msa-3s ease-out;
+}
+
+.buttons {
+  padding:0 0 0 25px;
+  display:inline-block;
+  zoom:1;
+  margin-top:3px;
+}
+
+.msa-button:hover {
+  background-color: red;
+}
+
+.msa-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.51);
+  transition: opacity 500ms;
+  visibility: hidden;
+  opacity: 0;
+}
+.msa-overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.msa-popup { 
+  margin: 70px auto;
+  padding: 20px;
+  background: #000;
+  border-radius: 5px;
+  width: 65%;
+  position: relative;
+  transition: all 5s ease-in-out;
+}
+
+.msa-popup h2 {
+  margin-top: 0;
+  color: #333;
+  font-family: Tahoma, Arial, sans-serif;
+}
+.msa-popup .msa-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  transition: all 200ms;
+  font-weight: bold;
+  text-decoration: none;
+  color: #FFF;
+}
+.msa-popup .msa-close:hover {
+  color: #3462FA;
+}
+.msa-popup .msa-content {
+  max-height: 30%;
+  overflow: auto;
+  font-size:.9em;
+}
+
+.msa-container {
+  width:100%;
+  margin: 0 auto;
+  max-width: 600px;
+  text-align: center;
+  
+}
+.outer
+{
+    width:100%;
+    text-align: center;
+  
+}
+.inner
+{
+    display: inline-block;
+}
