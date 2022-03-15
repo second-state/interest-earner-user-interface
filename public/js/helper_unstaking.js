@@ -116,6 +116,7 @@ async function onButtonClickUnLock() {
     document.getElementById("pb").style.width = '0%';
     console.log("Disabling button");
     document.getElementById("button_unlock_tokens").disabled = true;
+    document.getElementById("button_restake_tokens").disabled = true;
     document.getElementById("pb").style.transition = "all 30s linear 0s";
     document.getElementById("pb").style.width = '80%';
     // Provider
@@ -194,7 +195,8 @@ async function onButtonClickUnLock() {
                             document.getElementById("pb").style.transition = "all 0.1s linear 0s";
                             document.getElementById("pb").style.width = '100%';
                             document.getElementById("pb").classList.remove("progress-bar-animated");
-                            document.getElementById("button_unlock_tokens").disabled = false;
+                                document.getElementById("button_unlock_tokens").disabled = false;
+                                document.getElementById("button_restake_tokens").disabled = false;
                             document.getElementById("pb").style.width = '0%';
                         });
                 });
@@ -240,6 +242,7 @@ async function onButtonClickUnLock() {
         document.getElementById("pb").style.width = '100%';
         document.getElementById("pb").classList.remove("progress-bar-animated");
         document.getElementById("button_unlock_tokens").disabled = false;
+        document.getElementById("button_restake_tokens").disabled = false;
         document.getElementById("pb").style.width = '0%';
     });
 }
@@ -250,6 +253,7 @@ async function onButtonClickReStakeAll() {
     document.getElementById("pb").style.width = '0%';
     console.log("Disabling button");
     document.getElementById("button_unlock_tokens").disabled = true;
+    document.getElementById("button_restake_tokens").disabled = true;
     document.getElementById("pb").style.transition = "all 30s linear 0s";
     document.getElementById("pb").style.width = '80%';
     // Provider
@@ -329,6 +333,7 @@ async function onButtonClickReStakeAll() {
                             document.getElementById("pb").style.width = '100%';
                             document.getElementById("pb").classList.remove("progress-bar-animated");
                             document.getElementById("button_unlock_tokens").disabled = false;
+                            document.getElementById("button_restake_tokens").disabled = false;
                             document.getElementById("pb").style.width = '0%';
                         });
                 });
@@ -374,6 +379,7 @@ async function onButtonClickReStakeAll() {
         document.getElementById("pb").style.width = '100%';
         document.getElementById("pb").classList.remove("progress-bar-animated");
         document.getElementById("button_unlock_tokens").disabled = false;
+        document.getElementById("button_restake_tokens").disabled = false;
         document.getElementById("pb").style.width = '0%';
     });
 }
