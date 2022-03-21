@@ -30,6 +30,8 @@ class Amounts {
         this.totalStateStaked = new ethers.BigNumber.from('0');
         this.reservePool = new ethers.BigNumber.from('0');
         this.basisPoints = new ethers.BigNumber.from('0');
+        this.userBalance = new ethers.BigNumber.from('0');
+        this.userInterest = new ethers.BigNumber.from('0');
     }
 
     getTimePeriod() {
@@ -60,6 +62,14 @@ class Amounts {
         return this.basisPoints;
     }
 
+    getUserBalance() {
+        return this.userBalance;
+    }
+
+    getUserInterest() {
+        return this.userInterest;
+    }
+
     setBasisPoints(_basisPoints) {
         this.basisPoints = _basisPoints;
     }
@@ -88,6 +98,14 @@ class Amounts {
         this.currentTime = _currentTime;
     }
 
+    setUserBalance(_userBalance) {
+        this.userBalance = _userBalance;
+    }
+
+    setUserInterest(_userInterest) {
+        this.userInterest = _userInterest;
+    }
+
     reset() {
         this.timePeriod = new ethers.BigNumber.from('0');
         this.initialTimePeriod = new ethers.BigNumber.from('0');
@@ -96,6 +114,8 @@ class Amounts {
         this.totalStateStaked = new ethers.BigNumber.from('0');
         this.reservePool = new ethers.BigNumber.from('0');
         this.basisPoints = new ethers.BigNumber.from('0');
+        this.userBalance = new ethers.BigNumber.from('0');
+        this.userInterest = new ethers.BigNumber.from('0');
     }
 }
 
@@ -358,42 +378,58 @@ async function onButtonClickReStakeAll() {
         stakingAmounts.setBasisPoints(basisPointsBN);
 
         // Calculate how much interest the reserve needs to hold
-        var preInterest = stateAmountInWei.mul(stakingAmounts.getBasisPoints());
-        var postInterest = preInterest.div(10000);
-        var weiPerSecond = postInterest.div(31536000);
-        var releaseEpoch;
-        releaseEpoch = stakingAmounts.getInitialTimePeriod().add(stakingAmounts.getTimePeriod());
-        var secondsRemaining = releaseEpoch.sub(stakingAmounts.getCurrentTime());
-        var interestEaredForThisStake = weiPerSecond.mul(secondsRemaining);
-        console.log(stakingAmounts.getTotalStateStaked().toString());
-        console.log(stakingAmounts.getTotalExpectedInterest().toString());
-        console.log(interestEaredForThisStake.toString());
-        console.log(stakingAmounts.getReservePool().toString());
+        stakingTimeLockContract.balances(recipientAddress).then((balanceResponse) => {
+            userBalanceBN = new ethers.BigNumber.from(balanceResponse);
+            stakingAmounts.setUserBalance(userBalanceBN);
 
+            stakingTimeLockContract.expectedInterest(recipientAddress).then((interestResponse) => {
+                userInterestBN = new ethers.BigNumber.from(interestResponse);
+                stakingAmounts.setUserInterest(userInterestBN);
 
-        if (stakingAmounts.getInitialTimePeriod() != 0 && stakingAmounts.getCurrentTime() > stakingAmounts.getTimePeriod().add(stakingAmounts.getInitialTimePeriod())) {
-            var toastResponse = JSON.stringify({
-                avatar: "../images/favicon.ico",
-                text: "Re-staking BOTH principle and interest for another round, please wait",
-                duration: 10000,
-                newWindow: true,
-                close: true,
-                gravity: "top", // `top` or `bottom`
-                position: "left", // `left`, `center` or `right`
-                backgroundColor: "linear-gradient(to right, #green, #607D3B)",
-                stopOnFocus: false, // Prevents dismissing of toast on hover
-                onClick: function() {} // Callback after click
-            });
-            var toastObject = JSON.parse(toastResponse);
-            Toastify(toastObject).showToast();
-            // Now we can go ahead and unstake the tokens
-            if (stakingAmounts.getTotalStateStaked().add(stakingAmounts.getTotalExpectedInterest()).add(interestEaredForThisStake).lte(stakingAmounts.getReservePool())) {
-                // Call re-stake
-                stakingTimeLockContract.reinvestAlreadyStakedTokensAndInterestEarned(erc20_contract_address.address).then((unlockResponse) => {
-                    unlockResponse.wait().then((unlockResponse01) => {
+                var preCalcAmountToReInvest = stakingAmounts.getUserBalance().add(stakingAmounts.getUserInterest());
+                var preInterest = preCalcAmountToReInvest.mul(stakingAmounts.getBasisPoints());
+
+                var postInterest = preInterest.div(10000);
+                var weiPerSecond = postInterest.div(31536000);
+                var releaseEpoch;
+                console.log("Initial time period: " + stakingAmounts.getInitialTimePeriod());
+                console.log("Time period: " + stakingAmounts.getTimePeriod());
+                // This is a restake at the beginning of a new term so seconds remaining is the whole stakingAmounts.getTimePeriod();
+                var secondsRemaining = stakingAmounts.getTimePeriod();
+                var interestEaredForThisStake = weiPerSecond.mul(secondsRemaining);
+                console.log(stakingAmounts.getTotalStateStaked().toString());
+                console.log(stakingAmounts.getTotalExpectedInterest().toString());
+                console.log(interestEaredForThisStake.toString());
+                console.log(stakingAmounts.getReservePool().toString());
+                if (stakingAmounts.getInitialTimePeriod().eq(0)) {
+                    var toastResponse = JSON.stringify({
+                        avatar: "../images/favicon.ico",
+                        text: "No tokens staked at present",
+                        duration: 10000,
+                        newWindow: true,
+                        close: true,
+                        gravity: "top", // `top` or `bottom`
+                        position: "right", // `left`, `center` or `right`
+                        backgroundColor: "linear-gradient(to right, #FF6600, #FFA500)",
+                        stopOnFocus: false, // Prevents dismissing of toast on hover
+                        onClick: function() {} // Callback after click
+                    });
+                    var toastObject = JSON.parse(toastResponse);
+                    Toastify(toastObject).showToast();
+                    sleep(1000).then(() => {
+                        document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                        document.getElementById("pb").style.width = '100%';
+                        document.getElementById("pb").classList.remove("progress-bar-animated");
+                        document.getElementById("button_unlock_tokens").disabled = false;
+                        document.getElementById("button_restake_tokens").disabled = false;
+                        document.getElementById("pb").style.width = '0%';
+                    });
+                } else {
+
+                    if (stakingAmounts.getInitialTimePeriod() != 0 && stakingAmounts.getCurrentTime() > stakingAmounts.getTimePeriod().add(stakingAmounts.getInitialTimePeriod())) {
                         var toastResponse = JSON.stringify({
                             avatar: "../images/favicon.ico",
-                            text: "Congratulations, tokens Re-staked",
+                            text: "Re-staking BOTH principle and interest for another round, please wait",
                             duration: 10000,
                             newWindow: true,
                             close: true,
@@ -405,7 +441,77 @@ async function onButtonClickReStakeAll() {
                         });
                         var toastObject = JSON.parse(toastResponse);
                         Toastify(toastObject).showToast();
-                        // UI mods
+                        // Now we can go ahead and unstake the tokens
+                        if (stakingAmounts.getTotalStateStaked().add(stakingAmounts.getTotalExpectedInterest()).add(interestEaredForThisStake).lte(stakingAmounts.getReservePool())) {
+                            // Call re-stake
+                            stakingTimeLockContract.reinvestAlreadyStakedTokensAndInterestEarned(erc20_contract_address.address).then((unlockResponse) => {
+                                unlockResponse.wait().then((unlockResponse01) => {
+                                    var toastResponse = JSON.stringify({
+                                        avatar: "../images/favicon.ico",
+                                        text: "Congratulations, tokens Re-staked",
+                                        duration: 10000,
+                                        newWindow: true,
+                                        close: true,
+                                        gravity: "top", // `top` or `bottom`
+                                        position: "left", // `left`, `center` or `right`
+                                        backgroundColor: "linear-gradient(to right, #green, #607D3B)",
+                                        stopOnFocus: false, // Prevents dismissing of toast on hover
+                                        onClick: function() {} // Callback after click
+                                    });
+                                    var toastObject = JSON.parse(toastResponse);
+                                    Toastify(toastObject).showToast();
+                                    // UI mods
+                                    sleep(1000).then(() => {
+                                        document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                                        document.getElementById("pb").style.width = '100%';
+                                        document.getElementById("pb").classList.remove("progress-bar-animated");
+                                        document.getElementById("button_unlock_tokens").disabled = false;
+                                        document.getElementById("button_restake_tokens").disabled = false;
+                                        document.getElementById("pb").style.width = '0%';
+                                    });
+                                });
+                            });
+                        } else {
+                            var toastResponse = JSON.stringify({
+                                avatar: "../images/favicon.ico",
+                                text: "Not enough STATE tokens in the reserve pool, to facilitate this restake, please contact owner of this contract ",
+                                duration: 10000,
+                                newWindow: true,
+                                close: true,
+                                gravity: "top", // `top` or `bottom`
+                                position: "right", // `left`, `center` or `right`
+                                backgroundColor: "linear-gradient(to right, #FF6600, #FFA500)",
+                                stopOnFocus: false, // Prevents dismissing of toast on hover
+                                onClick: function() {} // Callback after click
+                            });
+                            var toastObject = JSON.parse(toastResponse);
+                            Toastify(toastObject).showToast();
+                            // UI mods
+                            sleep(1000).then(() => {
+                                document.getElementById("pb").style.transition = "all 0.1s linear 0s";
+                                document.getElementById("pb").style.width = '100%';
+                                document.getElementById("pb").classList.remove("progress-bar-animated");
+                                document.getElementById("button_unlock_tokens").disabled = false;
+                                document.getElementById("button_restake_tokens").disabled = false;
+                                document.getElementById("pb").style.width = '0%';
+                            });
+                        }
+
+                    } else {
+                        var toastResponse = JSON.stringify({
+                            avatar: "../images/favicon.ico",
+                            text: "This round is still active, please try again later",
+                            duration: 10000,
+                            newWindow: true,
+                            close: true,
+                            gravity: "top", // `top` or `bottom`
+                            position: "right", // `left`, `center` or `right`
+                            backgroundColor: "linear-gradient(to right, #FF6600, #FFA500)",
+                            stopOnFocus: false, // Prevents dismissing of toast on hover
+                            onClick: function() {} // Callback after click
+                        });
+                        var toastObject = JSON.parse(toastResponse);
+                        Toastify(toastObject).showToast();
                         sleep(1000).then(() => {
                             document.getElementById("pb").style.transition = "all 0.1s linear 0s";
                             document.getElementById("pb").style.width = '100%';
@@ -414,52 +520,10 @@ async function onButtonClickReStakeAll() {
                             document.getElementById("button_restake_tokens").disabled = false;
                             document.getElementById("pb").style.width = '0%';
                         });
-                    });
-                });
-            } else {
-                var toastResponse = JSON.stringify({
-                    avatar: "../images/favicon.ico",
-                    text: "Not enough STATE tokens in the reserve pool, to facilitate this restake, please contact owner of this contract ",
-                    duration: 10000,
-                    newWindow: true,
-                    close: true,
-                    gravity: "top", // `top` or `bottom`
-                    position: "right", // `left`, `center` or `right`
-                    backgroundColor: "linear-gradient(to right, #FF6600, #FFA500)",
-                    stopOnFocus: false, // Prevents dismissing of toast on hover
-                    onClick: function() {} // Callback after click
-                });
-                var toastObject = JSON.parse(toastResponse);
-                Toastify(toastObject).showToast();
-                // UI mods
-                sleep(1000).then(() => {
-                    document.getElementById("pb").style.transition = "all 0.1s linear 0s";
-                    document.getElementById("pb").style.width = '100%';
-                    document.getElementById("pb").classList.remove("progress-bar-animated");
-                    document.getElementById("button_unlock_tokens").disabled = false;
-                    document.getElementById("button_restake_tokens").disabled = false;
-                    document.getElementById("pb").style.width = '0%';
-                });
-            }
-
-        } else {
-            var toastResponse = JSON.stringify({
-                avatar: "../images/favicon.ico",
-                text: "This round is still active, please try again later",
-                duration: 10000,
-                newWindow: true,
-                close: true,
-                gravity: "top", // `top` or `bottom`
-                position: "right", // `left`, `center` or `right`
-                backgroundColor: "linear-gradient(to right, #FF6600, #FFA500)",
-                stopOnFocus: false, // Prevents dismissing of toast on hover
-                onClick: function() {} // Callback after click
+                    }
+                }
             });
-            var toastObject = JSON.parse(toastResponse);
-            Toastify(toastObject).showToast();
-        }
-
-
+        });
     } else {
         var toastResponse = JSON.stringify({
             avatar: "../images/favicon.ico",
